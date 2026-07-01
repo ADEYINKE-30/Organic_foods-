@@ -1,0 +1,194 @@
+name: CI/CD — FreshMart
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # ─── Type Check ────────────────────────────────────────────
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  # ─── Lint ──────────────────────────────────────────────────
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  # ─── Architecture Guards ───────────────────────────────────
+  architecture-guards:
+    name: Architecture Guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No nodemailer imports
+        run: |
+          if grep -r "from 'nodemailer'" apps/ packages/; then
+            echo "❌ nodemailer found — use Brevo REST API only"
+            exit 1
+          fi
+
+      - name: No hardcoded Stripe keys
+        run: |
+          if grep -rE "sk_(live|test)_[A-Za-z0-9]+" apps/ packages/; then
+            echo "❌ Hardcoded Stripe key found"
+            exit 1
+          fi
+
+      - name: No DB imports in frontend
+        run: |
+          if grep -r "@freshmart/db" apps/web/; then
+            echo "❌ DB package imported in frontend — server only"
+            exit 1
+          fi
+
+      - name: No raw SQL strings
+        run: |
+          if grep -rE "db.execute('" apps/server/; then
+            echo "❌ Raw SQL string found — use Drizzle ORM methods"
+            exit 1
+          fi
+
+      - name: No float type for money in schema
+        run: |
+          if grep -rE "real(|float(|doublePrecision(" packages/db/src/schema/ | grep -i price; then
+            echo "❌ Float type for money — use decimal({ precision: 10, scale: 2 })"
+            exit 1
+          fi
+
+      - name: No hard delete of products
+        run: |
+          if grep -rn "db.delete(products)" apps/server/src/services/; then
+            echo "❌ Hard delete of products found — use isDeleted=true soft delete"
+            exit 1
+          fi
+
+  # ─── Unit Tests ────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:unit
+
+  # ─── Integration Tests ─────────────────────────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: freshmart_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/freshmart_test
+      JWT_SECRET: test-secret-min-64-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      JWT_REFRESH_SECRET: test-refresh-secret-min-64-chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      BREVO_API_KEY: test-key
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      CLOUDINARY_CLOUD_NAME: test
+      CLOUDINARY_API_KEY: test
+      CLOUDINARY_API_SECRET: test
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:push
+      - run: pnpm test:integration
+
+  # ─── Build ─────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, architecture-guards]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            apps/web/build/
+            apps/server/dist/
+
+  # ─── Deploy to Render ──────────────────────────────────────
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Trigger Render Deploy (API)
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_SERVER }}
+      - name: Trigger Render Deploy (Web)
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_WEB }}
+
+  # ─── Health Check ──────────────────────────────────────────
+  healthcheck:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Wait for deploy
+        run: sleep 60
+      - name: Check API health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_URL }}/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Health check failed with status $STATUS"
+            exit 1
+          fi
+          echo "✅ API healthy"
+      - name: Check Web health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.WEB_URL }})
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Web health check failed with status $STATUS"
+            exit 1
+          fi
+          echo "✅ Web healthy"

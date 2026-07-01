@@ -1,0 +1,14 @@
+{
+  "name": "freshmart-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter \"*\" build",
+    "dev": "pnpm --parallel dev",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

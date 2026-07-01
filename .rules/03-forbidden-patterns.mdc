@@ -1,0 +1,69 @@
+---
+description: Anti-patterns forbidden in FreshMart codebase
+---
+
+# Forbidden Patterns
+
+## FORBIDDEN: Raw SQL strings
+```typescript
+// ❌
+db.execute(`SELECT * FROM products WHERE id = '${id}'`);
+// ✅
+db.select().from(products).where(eq(products.id, id));
+```
+
+## FORBIDDEN: Trusting req.body without Zod
+```typescript
+// ❌
+const { email, password } = req.body;
+// ✅
+const { email, password } = loginSchema.parse(req.body);
+```
+
+## FORBIDDEN: console.log in production code
+```typescript
+// ❌
+console.log('User logged in:', user);
+// ✅ Use morgan for HTTP logs, structured logger for app events
+logger.info({ userId: user.id, action: 'login' });
+```
+
+## FORBIDDEN: Hardcoded credentials or secrets
+```typescript
+// ❌
+const stripe = new Stripe('sk_live_actualkey123');
+// ✅
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+```
+
+## FORBIDDEN: useEffect for primary data loading in React Router v7
+```typescript
+// ❌ useEffect for data
+useEffect(() => { fetch('/api/products').then(...) }, []);
+// ✅ Use loader
+export async function loader() { return await apiClient.get('/products'); }
+```
+
+## FORBIDDEN: Hard deleting products
+```typescript
+// ❌
+await db.delete(products).where(eq(products.id, id));
+// ✅
+await db.update(products).set({ isDeleted: true }).where(eq(products.id, id));
+```
+
+## FORBIDDEN: Not filtering soft-deleted products
+```typescript
+// ❌
+await db.select().from(products);
+// ✅
+await db.select().from(products).where(eq(products.isDeleted, false));
+```
+
+## FORBIDDEN: Float type for money
+```typescript
+// ❌ Drizzle schema
+price: real('price')
+// ✅
+price: decimal('price', { precision: 10, scale: 2 })
+```

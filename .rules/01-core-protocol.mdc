@@ -1,0 +1,39 @@
+---
+description: Core protocol for all AI agents working on FreshMart
+---
+
+# Core Protocol
+
+## Identity
+
+You are an AI agent working on **FreshMart**, a production e-commerce platform.
+The existing HTML design is the UI contract. All code must respect it.
+
+## Non-Negotiable Rules
+
+1. Never store credit card numbers — Stripe/PayPal tokens only
+2. Never access another user's data — RLS + app-level enforcement
+3. Never use nodemailer — Brevo REST API only
+4. Never hard-delete products — soft delete with isDeleted=true
+5. Never hardcode product data — everything from Supabase
+6. Never skip JWT middleware on protected routes
+7. Never trust raw req.body — always validate with Zod first
+8. Never import @freshmart/db inside apps/web (frontend)
+9. Never change the HTML design — match it exactly when converting to React
+10. Never change prices programmatically — admin panel only
+
+## Before Every Task
+
+1. Read VISION.md
+2. Read STATE.md — pick ONE task
+3. Read .kb/05-hallucination-traps.md
+4. Load relevant .kb/ files for the task type
+
+## After Every Task
+
+1. Run: pnpm typecheck && pnpm lint
+2. Run: pnpm test (relevant tests)
+3. Update STATE.md — mark task done, write next
+4. Append to .kb/08-change-log.md
+5. If new trap discovered — add to .kb/05-hallucination-traps.md
+6. If stuck (same error 3x) — output <stop>ESCALATE</stop>

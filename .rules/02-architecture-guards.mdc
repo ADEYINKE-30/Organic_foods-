@@ -1,0 +1,51 @@
+---
+description: Architecture boundary rules for FreshMart
+---
+
+# Architecture Guards
+
+## Layer Boundaries
+
+| Layer | Files | Can Import | Cannot Import |
+|---|---|---|---|
+| DB Schema | packages/db/src/schema/*.ts | drizzle-orm | express, react, services |
+| Validators | packages/validators/src/*.ts | zod, @freshmart/types | drizzle-orm, express |
+| Middleware | apps/server/src/middleware/*.ts | @freshmart/validators, jsonwebtoken | services (only auth.ts for user lookup) |
+| Services | apps/server/src/services/*.ts | @freshmart/db, @freshmart/types, external SDKs | express req/res |
+| Routes | apps/server/src/routes/*.ts | services, middleware, @freshmart/validators | drizzle-orm directly |
+| Frontend routes | apps/web/app/routes/*.tsx | @freshmart/types, @freshmart/validators | @freshmart/db, express |
+| Frontend components | apps/web/app/components/*.tsx | react, @freshmart/types | anything from apps/server |
+
+## Import Rules
+
+```typescript
+// ✅ Route imports service (correct)
+import { productService } from '../services/product.service.js';
+
+// ✅ Service imports DB (correct)
+import { db } from '../config/db.js';
+import { products } from '@freshmart/db';
+
+// ❌ Route imports DB directly (bypass service layer)
+import { db } from '../config/db.js'; // in a route file — FORBIDDEN
+
+// ❌ Frontend imports server code
+import { productService } from '../../../apps/server/src/services/product.service.js'; // FORBIDDEN
+```
+
+## Banned Patterns Per Layer
+
+### Route handlers must NOT:
+- Contain database queries
+- Contain business logic (tax calculation, stock checks, coupon math)
+- Return raw database rows (transform in service)
+
+### Services must NOT:
+- Import from `express`
+- Reference `req` or `res`
+- Return HTTP status codes
+
+### Frontend must NOT:
+- Import from `@freshmart/db`
+- Call Stripe SDK directly (use backend API)
+- Store JWT in localStorage (use httpOnly cookies for refresh, memory for access)

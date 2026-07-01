@@ -1,0 +1,40 @@
+---
+description: When and how agents must update .kb/ files
+---
+
+# Self-Update Protocol
+
+## When to Update
+
+| Event | Files to Update |
+|---|---|
+| Task completed | STATE.md, .kb/08-change-log.md |
+| New bug or trap discovered | .kb/05-hallucination-traps.md, .kb/09-known-issues.md |
+| New package added | .kb/02-tech-stack.md |
+| New endpoint added | .kb/01-project-overview.md |
+| Architecture changed | .kb/03-architecture.md, .kb/07-decisions-and-adr.md |
+| New env var needed | .kb/02-tech-stack.md |
+| Phase completed | VISION.md (update phase status), STATE.md |
+
+## How to Update
+
+```
+1. Complete the implementation task first
+2. Run typecheck + lint + tests
+3. THEN update docs — never update docs before code works
+4. In STATE.md:
+   - Move task from "In Progress" or "Task Queue" to "Completed Tasks"
+   - Add new tasks if discovered
+   - Update "Active Phase" if phase changed
+5. In .kb/08-change-log.md:
+   - Append: "- YYYY-MM-DD · [tool/agent] · [what was done]"
+6. In .kb/05-hallucination-traps.md (if new trap):
+   - Add numbered trap with ❌ wrong code, explanation, ✅ correct code
+```
+
+## What NOT to Do
+
+- Do not rewrite .kb/07-decisions-and-adr.md entries — append only
+- Do not delete entries from .kb/08-change-log.md
+- Do not mark a task done in STATE.md if tests are failing
+- Do not update STATE.md inside the same commit as the feature (separate commit is fine)

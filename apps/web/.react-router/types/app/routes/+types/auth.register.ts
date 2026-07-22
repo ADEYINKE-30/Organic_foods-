@@ -13,6 +13,9 @@ type Matches = [{
   id: "root";
   module: typeof import("../../root.js");
 }, {
+  id: "routes/_storefront";
+  module: typeof import("../_storefront.js");
+}, {
   id: "routes/auth.register";
   module: typeof import("../auth.register.js");
 }];

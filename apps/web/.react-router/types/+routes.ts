@@ -36,6 +36,12 @@ type Pages = {
   "/account": {
     params: {};
   };
+  "/account/wishlist": {
+    params: {};
+  };
+  "/account/addresses": {
+    params: {};
+  };
   "/orders": {
     params: {};
   };
@@ -48,6 +54,12 @@ type Pages = {
     params: {};
   };
   "/auth/register": {
+    params: {};
+  };
+  "/auth/forgot-password": {
+    params: {};
+  };
+  "/auth/reset-password": {
     params: {};
   };
   "/blog": {
@@ -67,6 +79,14 @@ type Pages = {
   "/thank-you": {
     params: {};
   };
+  "/deals": {
+    params: {};
+  };
+  "/*": {
+    params: {
+      "*": string;
+    };
+  };
   "/admin/dashboard": {
     params: {};
   };
@@ -76,20 +96,25 @@ type Pages = {
   "/admin/orders": {
     params: {};
   };
-  "/admin/users": {
+  "/admin/customers": {
     params: {};
   };
-  "/*": {
-    params: {
-      "*": string;
-    };
+  "/admin/coupons": {
+    params: {};
+  };
+  "/admin/newsletter": {
+    params: {};
   };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/products" | "/products/:slug" | "/category/:slug" | "/cart" | "/checkout" | "/account" | "/orders" | "/orders/:id" | "/auth/login" | "/auth/register" | "/blog" | "/blog/:slug" | "/about" | "/contact" | "/thank-you" | "/admin/dashboard" | "/admin/products" | "/admin/orders" | "/admin/users" | "/*";
+    page: "/" | "/products" | "/products/:slug" | "/category/:slug" | "/cart" | "/checkout" | "/account" | "/account/wishlist" | "/account/addresses" | "/orders" | "/orders/:id" | "/auth/login" | "/auth/register" | "/auth/forgot-password" | "/auth/reset-password" | "/blog" | "/blog/:slug" | "/about" | "/contact" | "/thank-you" | "/deals" | "/*" | "/admin/dashboard" | "/admin/products" | "/admin/orders" | "/admin/customers" | "/admin/coupons" | "/admin/newsletter";
+  };
+  "routes/_storefront.tsx": {
+    id: "routes/_storefront";
+    page: "/" | "/products" | "/products/:slug" | "/category/:slug" | "/cart" | "/checkout" | "/account" | "/account/wishlist" | "/account/addresses" | "/orders" | "/orders/:id" | "/auth/login" | "/auth/register" | "/auth/forgot-password" | "/auth/reset-password" | "/blog" | "/blog/:slug" | "/about" | "/contact" | "/thank-you" | "/deals" | "/*";
   };
   "routes/_index.tsx": {
     id: "routes/_index";
@@ -119,6 +144,14 @@ type RouteFiles = {
     id: "routes/account";
     page: "/account";
   };
+  "routes/account.wishlist.tsx": {
+    id: "routes/account.wishlist";
+    page: "/account/wishlist";
+  };
+  "routes/account.addresses.tsx": {
+    id: "routes/account.addresses";
+    page: "/account/addresses";
+  };
   "routes/orders._index.tsx": {
     id: "routes/orders._index";
     page: "/orders";
@@ -134,6 +167,14 @@ type RouteFiles = {
   "routes/auth.register.tsx": {
     id: "routes/auth.register";
     page: "/auth/register";
+  };
+  "routes/auth.forgot-password.tsx": {
+    id: "routes/auth.forgot-password";
+    page: "/auth/forgot-password";
+  };
+  "routes/auth.reset-password.tsx": {
+    id: "routes/auth.reset-password";
+    page: "/auth/reset-password";
   };
   "routes/blog._index.tsx": {
     id: "routes/blog._index";
@@ -155,6 +196,18 @@ type RouteFiles = {
     id: "routes/thank-you";
     page: "/thank-you";
   };
+  "routes/deals.tsx": {
+    id: "routes/deals";
+    page: "/deals";
+  };
+  "routes/$.tsx": {
+    id: "routes/$";
+    page: "/*";
+  };
+  "routes/admin/_admin.tsx": {
+    id: "routes/admin/_admin";
+    page: "/admin/dashboard" | "/admin/products" | "/admin/orders" | "/admin/customers" | "/admin/coupons" | "/admin/newsletter";
+  };
   "routes/admin/dashboard.tsx": {
     id: "routes/admin/dashboard";
     page: "/admin/dashboard";
@@ -167,18 +220,23 @@ type RouteFiles = {
     id: "routes/admin/orders._index";
     page: "/admin/orders";
   };
-  "routes/admin/users._index.tsx": {
-    id: "routes/admin/users._index";
-    page: "/admin/users";
+  "routes/admin/customers._index.tsx": {
+    id: "routes/admin/customers._index";
+    page: "/admin/customers";
   };
-  "routes/$.tsx": {
-    id: "routes/$";
-    page: "/*";
+  "routes/admin/coupons._index.tsx": {
+    id: "routes/admin/coupons._index";
+    page: "/admin/coupons";
+  };
+  "routes/admin/newsletter._index.tsx": {
+    id: "routes/admin/newsletter._index";
+    page: "/admin/newsletter";
   };
 };
 
 type RouteModules = {
   "root": typeof import("./app/root.tsx");
+  "routes/_storefront": typeof import("./app/routes/_storefront.tsx");
   "routes/_index": typeof import("./app/routes/_index.tsx");
   "routes/products._index": typeof import("./app/routes/products._index.tsx");
   "routes/products.$slug": typeof import("./app/routes/products.$slug.tsx");
@@ -186,18 +244,26 @@ type RouteModules = {
   "routes/cart": typeof import("./app/routes/cart.tsx");
   "routes/checkout": typeof import("./app/routes/checkout.tsx");
   "routes/account": typeof import("./app/routes/account.tsx");
+  "routes/account.wishlist": typeof import("./app/routes/account.wishlist.tsx");
+  "routes/account.addresses": typeof import("./app/routes/account.addresses.tsx");
   "routes/orders._index": typeof import("./app/routes/orders._index.tsx");
   "routes/orders.$id": typeof import("./app/routes/orders.$id.tsx");
   "routes/auth.login": typeof import("./app/routes/auth.login.tsx");
   "routes/auth.register": typeof import("./app/routes/auth.register.tsx");
+  "routes/auth.forgot-password": typeof import("./app/routes/auth.forgot-password.tsx");
+  "routes/auth.reset-password": typeof import("./app/routes/auth.reset-password.tsx");
   "routes/blog._index": typeof import("./app/routes/blog._index.tsx");
   "routes/blog.$slug": typeof import("./app/routes/blog.$slug.tsx");
   "routes/about": typeof import("./app/routes/about.tsx");
   "routes/contact": typeof import("./app/routes/contact.tsx");
   "routes/thank-you": typeof import("./app/routes/thank-you.tsx");
+  "routes/deals": typeof import("./app/routes/deals.tsx");
+  "routes/$": typeof import("./app/routes/$.tsx");
+  "routes/admin/_admin": typeof import("./app/routes/admin/_admin.tsx");
   "routes/admin/dashboard": typeof import("./app/routes/admin/dashboard.tsx");
   "routes/admin/products._index": typeof import("./app/routes/admin/products._index.tsx");
   "routes/admin/orders._index": typeof import("./app/routes/admin/orders._index.tsx");
-  "routes/admin/users._index": typeof import("./app/routes/admin/users._index.tsx");
-  "routes/$": typeof import("./app/routes/$.tsx");
+  "routes/admin/customers._index": typeof import("./app/routes/admin/customers._index.tsx");
+  "routes/admin/coupons._index": typeof import("./app/routes/admin/coupons._index.tsx");
+  "routes/admin/newsletter._index": typeof import("./app/routes/admin/newsletter._index.tsx");
 };

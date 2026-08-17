@@ -8,12 +8,13 @@
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "noEmit": true,
+    "rootDirs": [".react-router/types/app", "app"],
     "paths": {
       "~/*": ["./app/*"]
     }
   },
   "include": [
     "app/**/*",
-    ".react-router/**/*"
+    ".react-router/types/**/*"
   ]
 }

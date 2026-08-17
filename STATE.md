@@ -6,9 +6,9 @@
 
 ## 📊 Current Status
 
-**Active Phase:** Phase 1 — Architecture Setup
-**Last Updated:** 2026-07-01
-**Overall Progress:** 0 / 7 phases complete
+**Active Phase:** Phase 3 — Mature storefront + Admin console complete
+**Last Updated:** 2026-07-08
+**Overall Progress:** Customer + Admin UIs mature and backend-ready; Express APIs still pending
 
 ## ✅ Completed Tasks
 - 2026-07-01 · Antigravity · Initialized pnpm monorepo workspace at root
@@ -17,11 +17,23 @@
 - 2026-07-01 · Antigravity · Set up shared `@freshmart/types` and `@freshmart/validators` (Zod schemas) packages
 - 2026-07-01 · Antigravity · Initialized Express backend app (`apps/server`) and React Router v7 app (`apps/web`) boilerplates
 - 2026-07-01 · Antigravity · Created `.env.example` file
+- 2026-07-08 · Cursor · Copied 67 template images to `apps/web/public/images/` and `index.html` to `apps/web/public/template/`
+- 2026-07-08 · Cursor · Converted `index.html` home page to React + Tailwind v4 (`_index.tsx` + layout/components)
+- 2026-07-08 · Cursor · Removed Bootstrap from frontend; configured Tailwind theme, Swiper carousels, Zustand cart/auth stores
+- 2026-07-08 · Cursor · `pnpm typecheck` passes in `apps/web`
+- 2026-07-08 · Cursor · Fixed Swiper 9 import (`Navigation` from `swiper`, not `swiper/modules`)
+- 2026-07-08 · Cursor · Converted all storefront routes (shop, cart, checkout, auth, blog, account, orders, admin, 404)
+- 2026-07-08 · Cursor · Wired cart offcanvas to Zustand store; extended mock-data helpers
+- 2026-07-08 · Cursor · UI overhaul: redesigned navbar (sticky, categories mega-menu, cart badge, mobile nav), design system tokens, responsive pages
+- 2026-07-08 · Cursor · Backend-ready catalog layer (`api-client`, `catalog.ts`, route loaders); storefront layout with shared category loader
+- 2026-07-08 · Cursor · Mature platform: RR v8 future flags; admin console (KPI dashboard, product CRUD, order kanban, customers, coupons, newsletter); customer wishlist/addresses/reorder; search suggestions; flash deals; enhanced shop filters; stepped checkout
+- 2026-07-08 · Cursor · Fixed customer navigation: cart offcanvas no longer blocks clicks when closed; mobile Sign in links; Zustand SSR hydration; removed experimental RR v8 flags
 
 ## 🔄 In Progress
-- [ ] Monorepo dependencies installation (`pnpm install`)
+- [ ] Implement Express APIs and set `VITE_USE_API=true`
 - [ ] Drizzle migrations generation and initial push
 - [ ] Supabase project connection + RLS policies setup
+- [ ] Backend API implementation (auth, products, cart)
 
 ## 📋 Task Queue (Prioritized)
 

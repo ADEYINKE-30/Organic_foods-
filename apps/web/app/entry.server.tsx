@@ -1,8 +1,8 @@
-import { isbot } from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
-import { ServerRouter } from "react-router";
-import type { AppLoadContext, EntryContext } from "@react-router/node";
-import { PassThrough } from "node:stream";
+import { isbot } from 'isbot';
+import { PassThrough } from 'node:stream';
+import type { AppLoadContext, EntryContext } from 'react-router';
+import { ServerRouter } from 'react-router';
+import { renderToPipeableStream } from 'react-dom/server';
 
 const ABORT_DELAY = 5_000;
 
@@ -13,7 +13,7 @@ export default function handleRequest(
   routerContext: EntryContext,
   _loadContext: AppLoadContext,
 ) {
-  return isbot(request.headers.get("user-agent") ?? "")
+  return isbot(request.headers.get('user-agent') ?? '')
     ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
     : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext);
 }
@@ -27,16 +27,15 @@ function handleBotRequest(
   return new Promise<Response>((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} abortDelay={ABORT_DELAY} />,
+      <ServerRouter context={routerContext} url={request.url} />,
       {
         onAllReady() {
           shellRendered = true;
           const body = new PassThrough();
-          const stream = body;
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
           resolve(
-            new Response(stream as unknown as BodyInit, {
+            new Response(body as unknown as BodyInit, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
@@ -67,16 +66,15 @@ function handleBrowserRequest(
   return new Promise<Response>((resolve, reject) => {
     let shellRendered = false;
     const { pipe, abort } = renderToPipeableStream(
-      <ServerRouter context={routerContext} url={request.url} abortDelay={ABORT_DELAY} />,
+      <ServerRouter context={routerContext} url={request.url} />,
       {
         onShellReady() {
           shellRendered = true;
           const body = new PassThrough();
-          const stream = body;
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
           resolve(
-            new Response(stream as unknown as BodyInit, {
+            new Response(body as unknown as BodyInit, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
